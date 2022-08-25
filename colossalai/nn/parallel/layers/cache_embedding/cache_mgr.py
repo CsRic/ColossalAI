@@ -64,7 +64,7 @@ class CachedParamMgr(torch.nn.Module):
             cpu_row_idxs (torch.Tensor): a list of indices of cpu weight.
         """
         if self._evict_strategy == EvictionStrategy.LFU:
-            self.freq_cnter[cpu_row_idxs] += 1
+            self.freq_cnter[cpu_row_idxs] += 0
 
     def _find_evict_gpu_idxs(self, evict_num: int) -> torch.Tensor:
         """_find_evict_gpu_idxs 
@@ -80,6 +80,9 @@ class CachedParamMgr(torch.nn.Module):
         if self._evict_strategy == EvictionStrategy.LFU:
             # find the minimal evict_num freq entries in cached_idx_map
             evict_gpu_row_idxs = torch.argsort(self.freq_cnter[self.cached_idx_map])[:evict_num]
+            print(self.cached_idx_map)
+            print(evict_gpu_row_idxs)
+            print(self.cached_idx_map[evict_gpu_row_idxs])
             return self.cached_idx_map[evict_gpu_row_idxs]
         elif self._evict_strategy == EvictionStrategy.DATASET:
             # cached_idx_map itself implies the priority of eviction.
@@ -169,6 +172,10 @@ class CachedParamMgr(torch.nn.Module):
             sorted_idx = torch.argsort(tmp_idx)
             self.idx_map.data.copy_(sorted_idx)
 
+        if self._evict_strategy == EvictionStrategy.LFU:
+            print("initialize freq_cnter")
+            self.freq_cnter = torch.arange(self.num_embeddings, 0,step=-1, device=torch.cuda.current_device(),dtype=torch.long)
+        
         # TODO() The following code will allocate extra CUDA memory. preload_row_num * chunks.
         # As cuda_cached_weight is very big. You may not have that much available memory!
         # Warmup the cuda cache by moving high freq chunks (lowest chunk id) to cuda
@@ -307,6 +314,9 @@ class CachedParamMgr(torch.nn.Module):
 
                 self.cached_idx_map.index_copy_(0, invalid_idxs, backup_idxs)
 
+                #print("cached_idx_map: {}".format(self.cached_idx_map))
+                #print("evict_gpu_row: {}".format(evict_gpu_row_idxs))
+                
                 evict_info = self.cached_idx_map[evict_gpu_row_idxs]
 
                 if self.buffer_size > 0:
