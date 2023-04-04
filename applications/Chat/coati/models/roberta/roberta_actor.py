@@ -1,38 +1,35 @@
 from typing import Optional
 
-from transformers.models.opt.configuration_opt import OPTConfig
-from transformers.models.opt.modeling_opt import OPTForCausalLM
+from transformers.models.roberta.configuration_roberta import RobertaConfig
+from transformers.models.roberta.modeling_roberta import RobertaForCausalLM
 
-from ..base import LM
+from ..base import Actor
 
-
-class OPTLM(LM):
+class RoBERTaActor(Actor):
     """
-    OPT language model.
+    RoBERTa Actor model.
 
     Args:
         pretrained (str): Pretrained model name or path.
-        config (OPTConfig): Model config.
+        config (RoBERTaConfig): Model config.
         checkpoint (bool): Enable gradient checkpointing.
         lora_rank (int): Rank of the low-rank approximation.
         lora_train_bias (str): LoRA bias training mode.
     """
 
+
     def __init__(self,
                  pretrained: Optional[str] = None,
-                 config: Optional[OPTConfig] = None,
+                 config: Optional[RobertaConfig] = None,
                  checkpoint: bool = False,
                  lora_rank: int = 0,
                  lora_train_bias: str = 'none') -> None:
         if pretrained is not None:
-            model = OPTForCausalLM.from_pretrained(pretrained)
+            model = RobertaForCausalLM.from_pretrained(pretrained)
         elif config is not None:
-            model = OPTForCausalLM(config)
+            model = RobertaForCausalLM(config)
         else:
-            model = OPTForCausalLM(OPTConfig())
+            model = RobertaForCausalLM(RobertaConfig())
         if checkpoint:
             model.gradient_checkpointing_enable()
         super().__init__(model, lora_rank, lora_train_bias)
-
-    def forward(self, input_ids, attention_mask=None, labels=None, **kwargs):
-        return self.model(input_ids, attention_mask=attention_mask, labels=labels, **kwargs)
