@@ -1,21 +1,21 @@
 
 PROMPT_PATH=/home/lccsr/data3/awesome-chatgpt-prompts/prompts.csv
 
-num_trainers=4
-num_makers=4
+num_trainers=1
+num_makers=3
 
-#  "facebook/opt-2.7b" 
-for pretrain in "facebook/opt-1.3b" "facebook/opt-6.7b" "facebook/opt-13b"
+#  "facebook/opt-2.7b" ""facebook/opt-1.3b" "
+for pretrain in "facebook/opt-1.3b" # "facebook/opt-6.7b" "facebook/opt-13b"
 do
     
-    for experience_batch_size in 16 32 64
+    for experience_batch_size in 32 # 4 8 16
     do
-        for train_batch_size in 16 32 64
+        for train_batch_size in 8 # 4 8 16
         do
-            for update_steps in 8 32 128
+            for update_steps in 128 # 4 16
             do
                 # set a big enough experience_steps for twice maker-update
-                experience_steps=$((2*num_trainers*train_batch_size*update_steps/num_makers/experience_batch_size))
+                experience_steps=$((2*num_trainers*train_batch_size*update_steps/num_makers/experience_batch_size+1))
 
                 config_string=${num_trainers}_${num_makers}_pretrain_${pretrain##*/}_experience_batch_size_${experience_batch_size}_train_batch_size_${train_batch_size}_update_steps_${update_steps}_experience_steps_${experience_steps}
                 echo running: ${config_string}

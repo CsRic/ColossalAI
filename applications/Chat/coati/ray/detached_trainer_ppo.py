@@ -117,7 +117,7 @@ class DetachedPPOTrainer(DetachedTrainer):
         tasks = []
         for target_holder in self.target_holder_list:
             tasks.append(target_holder.update_experience_maker.remote(chunk_start=True, fully_update=fully_update))
-        ray.get(tasks)
+        # ray.get(tasks)
         # sending loop
         tasks = []
 
@@ -132,7 +132,7 @@ class DetachedPPOTrainer(DetachedTrainer):
                 tasks.append(
                     target_holder.update_experience_maker.remote(new_critic_state_dict=state_dict_shard,
                                                                  fully_update=fully_update))
-        ray.get(tasks)
+        # ray.get(tasks)
         # mark end
         for target_holder in self.target_holder_list:
             target_holder.update_experience_maker.remote(chunk_end=True, fully_update=fully_update)

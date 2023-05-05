@@ -4,11 +4,12 @@ import random
 from threading import Lock
 from typing import Any, List
 
-import ray
+
 import torch
 from coati.experience_maker.base import Experience
 from coati.replay_buffer import ReplayBuffer
 from coati.replay_buffer.utils import BufferItem, make_experience_batch, split_experience_batch
+import ray
 # from torch.multiprocessing import Queue
 from ray.util.queue import Queue
 
